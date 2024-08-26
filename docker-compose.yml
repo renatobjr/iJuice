@@ -1,0 +1,26 @@
+version: "3"
+
+name: "ijuice"
+
+networks:
+  net-customer-services:
+    driver: bridge
+
+services:
+  # Databases
+  customer-db:
+    container_name: "customer-db"
+    image: mysql:8.4.0
+    ports:
+      - 3306:3306
+    volumes:
+      - ./app/api/customer/data/mysql:/var/lib/mysq:rw
+    env_file:
+      - ./envs/db/db.customer.env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+      - net-customer-services
