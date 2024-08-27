@@ -1,3 +1,4 @@
+// TODO: remember to create a .env file for docker compose injection
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import CustomerService from "@/customer/services/customerService";
 import { CustomerService as Service } from "@/customer/generated/customer";

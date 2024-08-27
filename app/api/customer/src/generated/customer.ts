@@ -21,6 +21,11 @@ import {
 
 export const protobufPackage = "customer";
 
+export interface TokenResponse {
+  id: number;
+  email: string;
+}
+
 export interface RegisterRequest {
   name: string;
   email: string;
@@ -42,6 +47,89 @@ export interface LoginResponse {
   message: string;
   token: string;
 }
+
+export interface TokenVerifyRequest {
+  token: string;
+}
+
+export interface TokenVerifyResponse {
+  status: boolean;
+  message?: TokenResponse | undefined;
+}
+
+function createBaseTokenResponse(): TokenResponse {
+  return { id: 0, email: "" };
+}
+
+export const TokenResponse = {
+  encode(message: TokenResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.email !== "") {
+      writer.uint32(18).string(message.email);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TokenResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTokenResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TokenResponse {
+    return {
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+    };
+  },
+
+  toJSON(message: TokenResponse): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TokenResponse>, I>>(base?: I): TokenResponse {
+    return TokenResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TokenResponse>, I>>(object: I): TokenResponse {
+    const message = createBaseTokenResponse();
+    message.id = object.id ?? 0;
+    message.email = object.email ?? "";
+    return message;
+  },
+};
 
 function createBaseRegisterRequest(): RegisterRequest {
   return { name: "", email: "", password: "" };
@@ -369,6 +457,139 @@ export const LoginResponse = {
   },
 };
 
+function createBaseTokenVerifyRequest(): TokenVerifyRequest {
+  return { token: "" };
+}
+
+export const TokenVerifyRequest = {
+  encode(message: TokenVerifyRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.token !== "") {
+      writer.uint32(10).string(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TokenVerifyRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTokenVerifyRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.token = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TokenVerifyRequest {
+    return { token: isSet(object.token) ? globalThis.String(object.token) : "" };
+  },
+
+  toJSON(message: TokenVerifyRequest): unknown {
+    const obj: any = {};
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TokenVerifyRequest>, I>>(base?: I): TokenVerifyRequest {
+    return TokenVerifyRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TokenVerifyRequest>, I>>(object: I): TokenVerifyRequest {
+    const message = createBaseTokenVerifyRequest();
+    message.token = object.token ?? "";
+    return message;
+  },
+};
+
+function createBaseTokenVerifyResponse(): TokenVerifyResponse {
+  return { status: false, message: undefined };
+}
+
+export const TokenVerifyResponse = {
+  encode(message: TokenVerifyResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== false) {
+      writer.uint32(8).bool(message.status);
+    }
+    if (message.message !== undefined) {
+      TokenResponse.encode(message.message, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TokenVerifyResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTokenVerifyResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.bool();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = TokenResponse.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TokenVerifyResponse {
+    return {
+      status: isSet(object.status) ? globalThis.Boolean(object.status) : false,
+      message: isSet(object.message) ? TokenResponse.fromJSON(object.message) : undefined,
+    };
+  },
+
+  toJSON(message: TokenVerifyResponse): unknown {
+    const obj: any = {};
+    if (message.status !== false) {
+      obj.status = message.status;
+    }
+    if (message.message !== undefined) {
+      obj.message = TokenResponse.toJSON(message.message);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TokenVerifyResponse>, I>>(base?: I): TokenVerifyResponse {
+    return TokenVerifyResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TokenVerifyResponse>, I>>(object: I): TokenVerifyResponse {
+    const message = createBaseTokenVerifyResponse();
+    message.status = object.status ?? false;
+    message.message = (object.message !== undefined && object.message !== null)
+      ? TokenResponse.fromPartial(object.message)
+      : undefined;
+    return message;
+  },
+};
+
 export type CustomerService = typeof CustomerService;
 export const CustomerService = {
   register: {
@@ -389,11 +610,21 @@ export const CustomerService = {
     responseSerialize: (value: LoginResponse) => Buffer.from(LoginResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => LoginResponse.decode(value),
   },
+  isAuthorized: {
+    path: "/customer.Customer/IsAuthorized",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: TokenVerifyRequest) => Buffer.from(TokenVerifyRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => TokenVerifyRequest.decode(value),
+    responseSerialize: (value: TokenVerifyResponse) => Buffer.from(TokenVerifyResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => TokenVerifyResponse.decode(value),
+  },
 } as const;
 
 export interface CustomerServer extends UntypedServiceImplementation {
   register: handleUnaryCall<RegisterRequest, RegisterResponse>;
   login: handleUnaryCall<LoginRequest, LoginResponse>;
+  isAuthorized: handleUnaryCall<TokenVerifyRequest, TokenVerifyResponse>;
 }
 
 export interface CustomerClient extends Client {
@@ -426,6 +657,21 @@ export interface CustomerClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: LoginResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: TokenVerifyRequest,
+    callback: (error: ServiceError | null, response: TokenVerifyResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: TokenVerifyRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: TokenVerifyResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: TokenVerifyRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: TokenVerifyResponse) => void,
   ): ClientUnaryCall;
 }
 

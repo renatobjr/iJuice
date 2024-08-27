@@ -1,7 +1,8 @@
 import { Customer as CustomerEntity } from "@/customer/entities/customerEntity";
-import { CustomerServer } from "@/customer/generated/customer";
+import { CustomerServer, TokenResponse } from "@/customer/generated/customer";
 import CustomerRepository from "@/customer/repositories/customerRepository";
 import CustomerHelper from "@/customer/helpers/customerHelper";
+import { status } from "@grpc/grpc-js";
 
 const CustomerService: CustomerServer = {
   login: async (_call, callback) => {
@@ -57,6 +58,31 @@ const CustomerService: CustomerServer = {
       callback(null, { status: true, message: "created" });
     } catch (error) {
       callback({ details: "Internal Server Error" });
+    }
+  },
+
+  isAuthorized: async (_call, callback) => {
+    try {
+      let isAuth = CustomerHelper.verifyToken(_call.request.token);
+      if (isAuth !== null) {
+        let { email } = isAuth as unknown as TokenResponse;
+
+        await CustomerRepository.findByEmail(email)
+          .then((customer) => {
+            callback(null, {
+              status: true,
+              message: {
+                id: customer?.id as number,
+                email: customer?.email as string,
+              },
+            });
+          })
+          .catch((err) => {
+            throw err;
+          });
+      }
+    } catch (error) {
+      callback({ code: status.CANCELLED, details: "Unauthorize" }, null);
     }
   },
 };

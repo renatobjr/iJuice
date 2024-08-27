@@ -1,3 +1,4 @@
+// TODO: remember to create a .env file for docker compose injection
 import express from "express";
 import morgan from "morgan";
 import handlerResponse from "@/gateway/middlewares/handlerResponse";

@@ -25,6 +25,15 @@ const CustomerHelper = {
   createToken: (id: number, email: string): string => {
     return jwt.sign({ id, email }, secret, { expiresIn: "24h" });
   },
+  verifyToken: (token: string) => {
+    return jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        throw err;
+      }
+
+      return decoded;
+    });
+  },
 };
 
 export default CustomerHelper;

@@ -1,3 +1,4 @@
+// TODO: remember to create a .env file for docker compose injection
 import express from "express";
 import mongoose from "mongoose";
 import vendorSeed from "@/vendor/db/vendorSeed";

@@ -2,6 +2,11 @@ syntax = "proto3";
 
 package customer;
 
+message TokenResponse {
+  int32 id = 1;
+  string email = 2;
+}
+
 message RegisterRequest {
   string name = 1;
   string email = 2;
@@ -24,7 +29,17 @@ message LoginResponse {
   string token = 3;
 }
 
+message TokenVerifyRequest {
+  string token = 1;
+}
+
+message TokenVerifyResponse {
+  bool status = 1;
+  TokenResponse message = 2;
+}
+
 service Customer {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+  rpc IsAuthorized(TokenVerifyRequest) returns (TokenVerifyResponse);
 }
