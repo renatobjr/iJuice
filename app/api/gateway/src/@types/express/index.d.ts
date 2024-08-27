@@ -8,4 +8,11 @@ declare namespace Express {
     success: (HttpStatusCode: number, data: T) => void;
     error: (HttpStatusCode: number, error: ErrorInfo) => void;
   }
+
+  interface Request {
+    user: {
+      id: string;
+      email: string;
+    };
+  }
 }

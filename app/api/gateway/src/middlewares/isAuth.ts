@@ -1,6 +1,8 @@
 import { Handler } from "express";
 import CustomerClientGRPC from "@/gateway/config/customerServiceGRPC";
 
+type UserRequest = Express.Request["user"];
+
 const isAuth: Handler = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
@@ -14,6 +16,11 @@ const isAuth: Handler = async (req, res, next) => {
         if (err) {
           reject(err);
         }
+
+        req.user = {
+          id: response.message?.id,
+          email: response.message?.email,
+        } as unknown as UserRequest;
 
         resolve(response);
       }),

@@ -3,6 +3,9 @@ node_modules
 app/api/*/node_modules
 
 # Database
-app/api/customer/data
+app/api/*/data
 app/api/rabbitmq
 app/vendor/mongo
+
+# Migrations
+app/api/order/prisma/migrations

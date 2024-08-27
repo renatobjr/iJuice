@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  // url      = env("DATABASE_URL")
+  url      = "mysql://root:r4oelJBJP9DO0FS0xm@localhost:3307/bd_order?schema=public"
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  customer_id   Int
+  product_id    String
+  vendor_id     String
+  quantity      Int
+  total_value   Int
+  withdraw_day  DateTime
+  withdraw_time DateTime
+  status        String   @default("PENDING")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}

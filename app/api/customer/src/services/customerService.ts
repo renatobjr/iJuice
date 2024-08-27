@@ -39,6 +39,7 @@ const CustomerService: CustomerServer = {
 
       if (hasAccount) {
         return callback({
+          code: status.ALREADY_EXISTS,
           details: "Bad Request",
         });
       }
@@ -57,7 +58,7 @@ const CustomerService: CustomerServer = {
 
       callback(null, { status: true, message: "created" });
     } catch (error) {
-      callback({ details: "Internal Server Error" });
+      callback({ code: status.NOT_FOUND, details: "error" }, null);
     }
   },
 

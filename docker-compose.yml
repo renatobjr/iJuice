@@ -6,6 +6,9 @@ networks:
   net-customer-services:
     driver: bridge
 
+  net-order-services:
+    driver: bridge
+
   net-vendor-machines:
     driver: bridge
 
@@ -33,9 +36,9 @@ services:
       - net-rabbit-mq
 
   # Databases
-  vendor-mongo:
+  vendor-db:
     image: mongo:7.0.0
-    container_name: vendor-mongo
+    container_name: vendor-db
     ports:
       - 27017:27017
     volumes:
@@ -50,6 +53,23 @@ services:
       start_period: 30s
     networks:
       - net-vendor-machines
+
+  order-db:
+    container_name: "order-db"
+    image: mysql:8.4.0
+    ports:
+      - 3307:3306
+    volumes:
+      - ./app/api/order/data/mysql:/var/lib/mysq:rw
+    env_file:
+      - ./envs/db/db.order.env
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+      - net-order-services
 
   customer-db:
     container_name: "customer-db"

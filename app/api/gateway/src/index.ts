@@ -5,6 +5,7 @@ import handlerResponse from "@/gateway/middlewares/handlerResponse";
 import GatewayQueue from "@/gateway/brokers/gatewayQueue";
 import customerRoutes from "@/gateway/routes/customerRoutes";
 import vendorRoutes from "@/gateway/routes/vendorRoutes";
+import orderRoutes from "@/gateway/routes/orderRoutes";
 
 const gateway = express();
 
@@ -13,7 +14,8 @@ gateway
   .use(morgan("dev"))
   .use(handlerResponse)
   .use(customerRoutes)
-  .use(vendorRoutes);
+  .use(vendorRoutes)
+  .use(orderRoutes);
 
 gateway
   .listen("3000", () => {
