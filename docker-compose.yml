@@ -6,8 +6,51 @@ networks:
   net-customer-services:
     driver: bridge
 
+  net-vendor-machines:
+    driver: bridge
+
+  net-rabbit-mq:
+    driver: bridge
+
 services:
+  # Message Brokers
+  rabbit-mq:
+    image: rabbitmq:4.0-rc-management
+    container_name: rabbit-mq
+    hostname: rabbit-mq
+    ports:
+      - 5672:5672 # AMQP Port
+      - 15672:15672 # Management Port
+    volumes:
+      - ./app/api/rabbitmq/data:/var/lib/rabbitmq
+      - ./app/api/rabbitmq/logs:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - net-rabbit-mq
+
   # Databases
+  vendor-mongo:
+    image: mongo:7.0.0
+    container_name: vendor-mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./app/vendor/mongo/:/data/db:rw
+    env_file:
+      - ./envs/db/db.vendor.env
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.serverStatus().ok == 1"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+    networks:
+      - net-vendor-machines
+
   customer-db:
     container_name: "customer-db"
     image: mysql:8.4.0
@@ -18,7 +61,7 @@ services:
     env_file:
       - ./envs/db/db.customer.env
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 30s
       retries: 3
