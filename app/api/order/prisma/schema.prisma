@@ -10,8 +10,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  // url      = env("DATABASE_URL")
-  url      = "mysql://root:r4oelJBJP9DO0FS0xm@localhost:3307/bd_order?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 model Order {

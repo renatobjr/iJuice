@@ -1,4 +1,4 @@
-// TODO: remember to create a .env file for docker compose injection
+//TODO: Remember to install cors on services to accpet only requests from the gateway
 import express from "express";
 import morgan from "morgan";
 import handlerResponse from "@/gateway/middlewares/handlerResponse";
@@ -17,12 +17,16 @@ gateway
   .use(vendorRoutes)
   .use(orderRoutes);
 
+const PORT = process.env.GATEWAY_PORT;
+
 gateway
-  .listen("3000", () => {
-    console.log("[✔] Gateway gRPC Server is running on 3000");
+  .listen(PORT, () => {
+    console.log(`[✔] Gateway gRPC Server is running on ${PORT}`);
   })
   .on("listening", async () => {
-    await GatewayQueue.start().then(() => {
+    await GatewayQueue.start().then(async (channel) => {
+      await channel.assertQueue("discoveryService", { durable: false });
+
       console.log("[✔] Connected to RabbitMQ");
     });
   });

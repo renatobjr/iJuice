@@ -1,4 +1,3 @@
-// TODO: remember to create a .env file for docker compose injection
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import CustomerService from "@/customer/services/customerService";
 import { CustomerService as Service } from "@/customer/generated/customer";
@@ -6,10 +5,12 @@ import TypeORmConfig from "@/customer/config/typeORMConfig";
 
 const server = new Server();
 
+const CUSTOMER_GRPC_SERVER = process.env.CUSTOMER_GRPC_SERVER;
+
 TypeORmConfig.initialize().then(() => {
   server.addService(Service, CustomerService);
   server.bindAsync(
-    "localhost:50051",
+    CUSTOMER_GRPC_SERVER as string,
     ServerCredentials.createInsecure(),
     (err) => {
       if (err) throw err;

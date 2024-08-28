@@ -21,7 +21,7 @@ const VendorQueue = {
   ) => {
     await channel
       .assertQueue(queue, {
-        durable: true,
+        durable: false,
       })
       .then(() => {
         return channel.consume(queue, (message) => {

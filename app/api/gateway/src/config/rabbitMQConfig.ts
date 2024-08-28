@@ -1,6 +1,6 @@
 import { Channel, Connection, connect } from "amqplib";
 
-const ampqHost = "amqp://localhost";
+const ampqHost = process.env.RABBITMQ_SERVER as string;
 
 const RabbitMQConfig = async () => {
   try {

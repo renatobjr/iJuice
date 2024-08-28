@@ -5,10 +5,12 @@ import prismaConfig from "@/order/config/prismaConfig";
 
 const server = new Server();
 
+const ORDER_GRPC_SERVER = process.env.ORDER_GRPC_SERVER;
+
 prismaConfig.connection().then(() => {
   server.addService(Service, OrderService);
   server.bindAsync(
-    "localhost:50052",
+    ORDER_GRPC_SERVER as string,
     ServerCredentials.createInsecure(),
     (err) => {
       if (err) throw err;

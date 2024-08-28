@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "init:npm": "./scripts/InitNpm.sh",
     "proto": "./scripts/MakeProto.sh"
   },
   "dependencies": {

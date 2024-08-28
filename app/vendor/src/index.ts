@@ -7,8 +7,10 @@ import VendorQueue from "@/vendor/brokers/vendorQueue";
 
 const vendor = express();
 
+const MONGO_URL = process.env.MONGO_URL;
+
 mongoose
-  .connect("mongodb://root:root@localhost:27017/vendor?authSource=admin", {})
+  .connect(MONGO_URL as string, {})
   .then(() => {
     console.log("[✔] Connected to MongoDB");
     vendor.listen(4000, () => {

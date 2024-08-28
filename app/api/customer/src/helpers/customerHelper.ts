@@ -3,7 +3,7 @@ import { Customer as CustomerEntity } from "@/customer/entities/customerEntity";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-let secret = "8UtOUaEsAEtjmFFPqcYVLq5BdO40ZbLS";
+let secret = process.env.SECRET as string;
 
 const CustomerHelper = {
   hasAccount: async (email: string): Promise<CustomerEntity> => {

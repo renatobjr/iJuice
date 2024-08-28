@@ -2,12 +2,12 @@ import { DataSource } from "typeorm";
 import { Customer } from "@/customer/entities/customerEntity";
 
 const TypeORmConfig = new DataSource({
-  type: "mysql",
-  host: "localhost",
+  type: process.env.DB_TYPE as any,
+  host: process.env.DB_HOST,
   port: 3306,
-  username: "db_admin_customer",
-  password: "r4oelJBJP9DO0FS0xm",
-  database: "db_customer",
+  username: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
   entities: [Customer],
   synchronize: true,
   logging: true,
