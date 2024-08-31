@@ -23,8 +23,8 @@ const backLogin = () => {
 };
 
 const handleRegister = async () => {
-  // let is = await validateForm();
-  // if (!is) return;
+  let is = await validateForm();
+  if (!is) return;
 
   let message = "Wow! No you are registered. Please login to continue.";
   let color = "success";

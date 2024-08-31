@@ -9,8 +9,8 @@ import router from "@/router";
 
 const form = ref(null);
 const loginData = reactive({
-  email: "johndoe@null.net",
-  password: "123",
+  email: "",
+  password: "",
 });
 
 const validateForm = async () => {
