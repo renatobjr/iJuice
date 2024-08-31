@@ -153,6 +153,7 @@ services:
         condition: service_healthy
     networks:
       - net-order-service
+      - net-vendor-machine
       - net-rabbit-mq
 
   vendor-machine-service:
@@ -174,3 +175,20 @@ services:
     networks:
       - net-vendor-machine
       - net-rabbit-mq
+
+  juice-web:
+    container_name: juice-web
+    build:
+      context: .
+      dockerfile: infra/infra.web.Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./app/web:/var/www/web
+    depends_on:
+      gateway-api:
+        condition: service_started
+      rabbit-mq:
+        condition: service_healthy
+    networks:
+      - net-gateway-server

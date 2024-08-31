@@ -13,16 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Product {
+  id        Int     @id @default(autoincrement())
+  name      String
+  order     Order   @relation(fields: [order_id], references: [id])
+  order_id  Int
+  has_ice   Boolean
+  has_sugar Boolean
+}
+
 model Order {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   customer_id   Int
-  product_id    String
   vendor_id     String
+  host          String
   quantity      Int
+  products      Product[]
   total_value   Int
-  withdraw_day  DateTime
-  withdraw_time DateTime
-  status        String   @default("PENDING")
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  withdraw      DateTime
+  withdraw_code String?
+  status        String    @default("SEND TO VENDOR")
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 }

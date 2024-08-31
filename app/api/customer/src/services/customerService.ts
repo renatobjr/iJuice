@@ -8,11 +8,14 @@ const CustomerService: CustomerServer = {
   login: async (_call, callback) => {
     try {
       let customer = await CustomerRepository.findByEmail(_call.request.email);
-
       if (!customer) {
-        return callback({
-          details: "Not found",
-        });
+        return callback(
+          {
+            code: status.NOT_FOUND,
+            details: "Not found",
+          },
+          null
+        );
       }
 
       let isPasswordValid = await CustomerHelper.comparePassword(
@@ -22,15 +25,28 @@ const CustomerService: CustomerServer = {
 
       if (!isPasswordValid) {
         return callback({
+          code: status.UNAUTHENTICATED,
           details: "Unauthorized",
         });
       }
 
       let token = CustomerHelper.createToken(customer.id, customer.email);
 
-      callback(null, { status: true, message: "token created", token: token });
+      callback(null, {
+        status: true,
+        message: "token created",
+        token: token,
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+        },
+      });
     } catch (error) {
-      callback({ details: "Internal Server Error" });
+      callback(
+        { code: status.NOT_FOUND, details: "Internal Server Error" },
+        null
+      );
     }
   },
   register: async (_call, callback) => {
@@ -74,6 +90,7 @@ const CustomerService: CustomerServer = {
               status: true,
               message: {
                 id: customer?.id as number,
+                name: customer?.name as string,
                 email: customer?.email as string,
               },
             });

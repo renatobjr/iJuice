@@ -6,10 +6,10 @@ type UserRequest = Express.Request["user"];
 const isAuth: Handler = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
-      return res.error(401, { details: "Need a token" });
+      return res.error(400, { details: "Need a token" });
     }
 
-    let token = req.headers.authorization;
+    let token = req.headers.authorization.split(" ")[1];
 
     let decodedToken = new Promise((resolve, reject) => {
       CustomerClientGRPC.isAuthorized({ token }, (err, response) => {
@@ -28,6 +28,7 @@ const isAuth: Handler = async (req, res, next) => {
         req.user = {
           id: user.id,
           email: user.email,
+          name: user.name,
         };
 
         next();

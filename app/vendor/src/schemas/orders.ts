@@ -1,22 +1,21 @@
 import mongoose, { Schema } from "mongoose";
 
 export type OrderDocument = Document & {
-  id: string;
-  userId: string;
-  withdrawalCode: string;
-  status: string;
-  item: typeof Schema.ObjectId;
+  _id?: string;
+  customer_id: string;
+  withdraw_code: string;
+  products: Object[];
   quantity: number;
+  status?: string;
 };
 
 const OrderSchema: Schema = new Schema(
   {
-    id: { type: String, required: true },
-    userId: { type: String, required: true },
-    withdrawalCode: { type: String, required: true },
-    status: { type: String, required: true },
-    item: { type: Schema.ObjectId, required: true },
+    customer_id: { type: String, required: true },
+    withdraw_code: { type: String, required: true },
+    products: { type: [], required: true },
     quantity: { type: Number, required: true },
+    status: { type: String, default: "READY", required: true },
   },
   {
     timestamps: true,

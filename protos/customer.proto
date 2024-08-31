@@ -2,9 +2,16 @@ syntax = "proto3";
 
 package customer;
 
+message CustomerResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
 message TokenResponse {
   int32 id = 1;
   string email = 2;
+  string name = 3;
 }
 
 message RegisterRequest {
@@ -27,6 +34,7 @@ message LoginResponse {
   bool status = 1;
   string message = 2;
   string token = 3;
+  CustomerResponse customer = 4;
 }
 
 message TokenVerifyRequest {

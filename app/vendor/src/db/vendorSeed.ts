@@ -10,6 +10,7 @@ const vendorSeed = {
             {
               name: "iJuice",
               location: "Campina Grande",
+              host: "http://vendor-machine-service:4000",
               recipes: [
                 {
                   name: "Pink Lemonade",
@@ -135,9 +136,9 @@ const vendorSeed = {
                   price: 11,
                 },
               ],
-              isOpen: true,
-              openingTime: "08:00",
-              closingTime: "18:00",
+              is_open: true,
+              opening_time: "08:00",
+              closing_time: "18:00",
             },
           ],
         },

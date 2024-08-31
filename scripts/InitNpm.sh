@@ -14,3 +14,7 @@ docker compose run order-service npx prisma migrate dev --name init
 
 echo -ne "Create a Prisma Client on Users gRPC Server \n"
 docker compose run order-service npx prisma generate
+
+docker compose run juice-web npm ci
+
+docker compose up

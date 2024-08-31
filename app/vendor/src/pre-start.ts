@@ -1,35 +1,40 @@
 import vendorRepository from "@/vendor/repositories/vendorRepository";
-import { Channel } from "amqplib";
+import amqp from "amqplib/callback_api";
 
-const vendorIsOnline = async (channel: Channel) => {
+const ampqHost = process.env.RABBITMQ_SERVER as string;
+
+const vendorIsOnline = async () => {
   let vendor = await vendorRepository.vendorIsOnline();
 
   if (vendor?.status) {
-    const queue = "discoveryService";
-    const replyQueue = await channel.assertQueue("", {
-      exclusive: true,
-    });
-    let correlationId = vendor?.data?.map((vendor) => vendor._id).toString();
+    amqp.connect(ampqHost, (errorConn, connection) => {
+      if (errorConn) {
+        throw errorConn;
+      }
 
-    return new Promise((resolve, reject) => {
-      channel.consume(
-        replyQueue.queue,
-        (msg) => {
-          if (msg != null && msg.properties.correlationId === correlationId) {
-            channel.sendToQueue(queue, Buffer.from(JSON.stringify(vendor)), {
-              correlationId: correlationId,
-              replyTo: replyQueue.queue,
-            });
+      connection.createChannel((errorChannel, channel) => {
+        if (errorChannel) {
+          throw errorChannel;
+        }
 
-            resolve(msg);
+        let queue = "discoveryService";
+
+        channel.assertQueue(queue, { durable: false });
+        channel.prefetch(1);
+
+        channel.consume(queue, function reply(msg) {
+          if (msg) {
+            channel.sendToQueue(
+              msg.properties.replyTo,
+              Buffer.from(JSON.stringify(vendor)),
+              {
+                correlationId: msg.properties.correlationId,
+              }
+            );
+
+            channel.ack(msg);
           }
-        },
-        { noAck: true }
-      );
-
-      channel.sendToQueue(queue, Buffer.from(JSON.stringify(vendor)), {
-        correlationId: correlationId,
-        replyTo: replyQueue.queue,
+        });
       });
     });
   }

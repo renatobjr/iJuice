@@ -21,9 +21,16 @@ import {
 
 export const protobufPackage = "customer";
 
+export interface CustomerResponse {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export interface TokenResponse {
   id: number;
   email: string;
+  name: string;
 }
 
 export interface RegisterRequest {
@@ -46,6 +53,7 @@ export interface LoginResponse {
   status: boolean;
   message: string;
   token: string;
+  customer?: CustomerResponse | undefined;
 }
 
 export interface TokenVerifyRequest {
@@ -57,8 +65,97 @@ export interface TokenVerifyResponse {
   message?: TokenResponse | undefined;
 }
 
+function createBaseCustomerResponse(): CustomerResponse {
+  return { id: 0, name: "", email: "" };
+}
+
+export const CustomerResponse = {
+  encode(message: CustomerResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.email !== "") {
+      writer.uint32(26).string(message.email);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CustomerResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCustomerResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CustomerResponse {
+    return {
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+    };
+  },
+
+  toJSON(message: CustomerResponse): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CustomerResponse>, I>>(base?: I): CustomerResponse {
+    return CustomerResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CustomerResponse>, I>>(object: I): CustomerResponse {
+    const message = createBaseCustomerResponse();
+    message.id = object.id ?? 0;
+    message.name = object.name ?? "";
+    message.email = object.email ?? "";
+    return message;
+  },
+};
+
 function createBaseTokenResponse(): TokenResponse {
-  return { id: 0, email: "" };
+  return { id: 0, email: "", name: "" };
 }
 
 export const TokenResponse = {
@@ -68,6 +165,9 @@ export const TokenResponse = {
     }
     if (message.email !== "") {
       writer.uint32(18).string(message.email);
+    }
+    if (message.name !== "") {
+      writer.uint32(26).string(message.name);
     }
     return writer;
   },
@@ -93,6 +193,13 @@ export const TokenResponse = {
 
           message.email = reader.string();
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -106,6 +213,7 @@ export const TokenResponse = {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       email: isSet(object.email) ? globalThis.String(object.email) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
     };
   },
 
@@ -117,6 +225,9 @@ export const TokenResponse = {
     if (message.email !== "") {
       obj.email = message.email;
     }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
     return obj;
   },
 
@@ -127,6 +238,7 @@ export const TokenResponse = {
     const message = createBaseTokenResponse();
     message.id = object.id ?? 0;
     message.email = object.email ?? "";
+    message.name = object.name ?? "";
     return message;
   },
 };
@@ -369,7 +481,7 @@ export const LoginRequest = {
 };
 
 function createBaseLoginResponse(): LoginResponse {
-  return { status: false, message: "", token: "" };
+  return { status: false, message: "", token: "", customer: undefined };
 }
 
 export const LoginResponse = {
@@ -382,6 +494,9 @@ export const LoginResponse = {
     }
     if (message.token !== "") {
       writer.uint32(26).string(message.token);
+    }
+    if (message.customer !== undefined) {
+      CustomerResponse.encode(message.customer, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -414,6 +529,13 @@ export const LoginResponse = {
 
           message.token = reader.string();
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.customer = CustomerResponse.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -428,6 +550,7 @@ export const LoginResponse = {
       status: isSet(object.status) ? globalThis.Boolean(object.status) : false,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
       token: isSet(object.token) ? globalThis.String(object.token) : "",
+      customer: isSet(object.customer) ? CustomerResponse.fromJSON(object.customer) : undefined,
     };
   },
 
@@ -442,6 +565,9 @@ export const LoginResponse = {
     if (message.token !== "") {
       obj.token = message.token;
     }
+    if (message.customer !== undefined) {
+      obj.customer = CustomerResponse.toJSON(message.customer);
+    }
     return obj;
   },
 
@@ -453,6 +579,9 @@ export const LoginResponse = {
     message.status = object.status ?? false;
     message.message = object.message ?? "";
     message.token = object.token ?? "";
+    message.customer = (object.customer !== undefined && object.customer !== null)
+      ? CustomerResponse.fromPartial(object.customer)
+      : undefined;
     return message;
   },
 };

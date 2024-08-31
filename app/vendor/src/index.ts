@@ -1,11 +1,19 @@
-// TODO: remember to create a .env file for docker compose injection
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
+import bodyParser from "body-parser";
 import vendorSeed from "@/vendor/db/vendorSeed";
 import vendorIsOnline from "@/vendor/pre-start";
+import Start from "./brokers/start";
 import VendorQueue from "@/vendor/brokers/vendorQueue";
 
 const vendor = express();
+
+vendor
+  .use(express.json())
+  .use(express.urlencoded({ extended: true }))
+  .use(cors())
+  .use(bodyParser.json());
 
 const MONGO_URL = process.env.MONGO_URL;
 
@@ -20,15 +28,16 @@ mongoose
     });
   })
   .then(async () => {
-    await VendorQueue.start()
-      .then(async (channel) => {
+    await Start.connect()
+      .then(async () => {
         console.log("[✔] Connected to RabbitMQ");
-
-        if (channel) {
-          await vendorIsOnline(channel);
-        }
+        await vendorIsOnline();
+        VendorQueue.create();
       })
       .catch(() => {
         console.log("[✖] Error to connect to RabbitMQ");
       });
+  })
+  .finally(() => {
+    Start.close();
   });
