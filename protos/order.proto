@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package order;
+
+message UserRequest {
+  string id = 1;
+  string email = 2;
+}
+
+message Product {
+  string name = 1;
+  bool has_ice = 2;
+  bool has_sugar = 3;
+}
+
+message OrderResponse {
+  string id = 1;
+  string customer_id = 2;
+  string vendor_id = 3;
+  string host = 4;
+  int32 quantity = 5;
+  repeated Product products = 6;
+  string total_value = 7;
+  string withdraw_day = 8;
+  string withdraw_time = 9;
+  string status = 10;
+  string withdraw_code = 11;
+}
+
+message OrderCreateRequest {
+  int32 customer_id = 1;
+  string vendor_id = 2;
+  string host = 3;
+  int32 quantity = 4;
+  repeated Product products = 5;
+  string total_value = 6;
+  string withdraw_day = 7;
+  string withdraw_time = 8;
+}
+
+message OrderCreateResponse {
+  bool status = 1;
+  string message = 2;
+}
+
+message OrderListRequest {
+  string customer_id = 1;
+}
+
+message OrderListResponse {
+  repeated OrderResponse orders = 1;
+}
+
+service Order {
+  rpc Create(OrderCreateRequest) returns (OrderCreateResponse);
+  rpc List(OrderListRequest) returns (OrderListResponse);
+}
+

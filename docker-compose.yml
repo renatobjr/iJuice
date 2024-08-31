@@ -1,0 +1,194 @@
+version: "3"
+
+name: "ijuice"
+
+networks:
+  net-customer-service:
+    driver: bridge
+
+  net-order-service:
+    driver: bridge
+
+  net-vendor-machine:
+    driver: bridge
+
+  net-rabbit-mq:
+    driver: bridge
+
+  net-gateway-server:
+    driver: bridge
+
+services:
+  # Message Brokers
+  rabbit-mq:
+    container_name: "rabbit-mq"
+    image: rabbitmq:4.0-rc-management
+    hostname: rabbit-mq
+    ports:
+      - 5672:5672 # AMQP Port
+      - 15672:15672 # Management Port
+    volumes:
+      - ./app/api/rabbitmq/data:/var/lib/rabbitmq
+      - ./app/api/rabbitmq/logs:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - net-rabbit-mq
+
+  # Databases
+  vendor-db:
+    container_name: "vendor-db"
+    image: mongo:7.0.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ./app/vendor/mongo/:/data/db
+    env_file:
+      - ./envs/db/db.vendor.env
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+    networks:
+      - net-vendor-machine
+
+  order-db:
+    container_name: "order-db"
+    image: mysql:8.4.0
+    ports:
+      - 3307:3306
+    volumes:
+      - ./app/api/order/data/mysql:/var/lib/mysq
+    env_file:
+      - ./envs/db/db.order.env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+      - net-order-service
+
+  customer-db:
+    container_name: "customer-db"
+    image: mysql:8.4.0
+    ports:
+      - 3306:3306
+    volumes:
+      - ./app/api/customer/data/mysql:/var/lib/mysq
+    env_file:
+      - ./envs/db/db.customer.env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+      - net-customer-service
+
+  # Gateway
+  gateway-api:
+    container_name: "gateway-api"
+    build:
+      context: .
+      dockerfile: infra/infra.gateway.Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app/api/gateway:/var/www/gateway
+    env_file:
+      - ./envs/global/global.grpc.env
+      - ./envs/services/service.gateway.env
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+    networks:
+      - net-gateway-server
+      - net-rabbit-mq
+      - net-customer-service
+      - net-order-service
+      - net-vendor-machine
+
+  # Services
+  customer-service:
+    container_name: "customer-service"
+    build:
+      context: .
+      dockerfile: infra/infra.customer.Dockerfile
+    ports:
+      - 50051:50051
+    volumes:
+      - ./app/api/customer:/var/www/customer
+    env_file:
+      - ./envs/db/db.customer.env
+      - ./envs/global/global.grpc.env
+      - ./envs/services/service.customer.env
+    depends_on:
+      customer-db:
+        condition: service_healthy
+    networks:
+      - net-customer-service
+      - net-rabbit-mq
+
+  order-service:
+    container_name: "order-service"
+    build:
+      context: .
+      dockerfile: infra/infra.order.Dockerfile
+    ports:
+      - 50052:50052
+    volumes:
+      - ./app/api/order:/var/www/order
+    env_file:
+      - ./envs/db/db.order.env
+      - ./envs/global/global.grpc.env
+      - ./envs/services/service.order.env
+    depends_on:
+      order-db:
+        condition: service_healthy
+    networks:
+      - net-order-service
+      - net-vendor-machine
+      - net-rabbit-mq
+
+  vendor-machine-service:
+    container_name: "vendor-machine-service"
+    build:
+      context: .
+      dockerfile: infra/infra.vendor.Dockerfile
+    ports:
+      - 4000:4000
+    volumes:
+      - ./app/vendor:/var/www/vendor
+    env_file:
+      - ./envs/db/db.vendor.env
+      - ./envs/global/global.grpc.env
+      - ./envs/services/service.vendor.env
+    depends_on:
+      vendor-db:
+        condition: service_healthy
+    networks:
+      - net-vendor-machine
+      - net-rabbit-mq
+
+  juice-web:
+    container_name: juice-web
+    build:
+      context: .
+      dockerfile: infra/infra.web.Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./app/web:/var/www/web
+    depends_on:
+      gateway-api:
+        condition: service_started
+      rabbit-mq:
+        condition: service_healthy
+    networks:
+      - net-gateway-server

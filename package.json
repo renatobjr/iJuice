@@ -1,0 +1,13 @@
+{
+  "name": "ijuice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "init:npm": "./scripts/InitNpm.sh",
+    "proto": "./scripts/MakeProto.sh"
+  },
+  "dependencies": {
+    "grpc-tools": "^1.12.4",
+    "ts-proto": "^2.0.3"
+  }
+}
